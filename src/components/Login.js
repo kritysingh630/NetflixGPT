@@ -1,18 +1,66 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { CheckValidData } from "../utils/validate";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../utils/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const Login = () => {
   const [isSignInForm, setisSignInForm] = useState(true);
-  const [ErrorMessage,setErrorMessage] = useState(null)
+  const [ErrorMessage, setErrorMessage] = useState(null);
 
-  const FullName = useRef(null)
+  const FullName = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
 
-  const toggleCheckValidation = () => {
-    const message = CheckValidData(FullName.current.value,email.current.value,password.current.value)
-    setErrorMessage(message)
+  const handleButtonClick = () => {
+    const message = CheckValidData(
+      FullName.current ? FullName.current.value:'',
+      email.current.value,
+      password.current.value
+    )
+    setErrorMessage(message);
+    console.log(message)
+    if (message) return;
+
+    if (!isSignInForm) {
+      //Sign Up logic
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          console.log(user);
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+          // ..
+        });
+    } else {
+      //Sign In logic
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log(user);
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+        });
+    }
   };
 
   const toggleSignInForm = () => {
@@ -37,7 +85,7 @@ const Login = () => {
         </h2>
         {!isSignInForm && (
           <input
-          ref={FullName}
+            ref={FullName}
             className="p-4 my-2 w-full bg-slate-700 rounded-md"
             type="text"
             placeholder="Full Name"
@@ -58,7 +106,7 @@ const Login = () => {
         <p className="text-red-500 font-bold text-md py-2">{ErrorMessage}</p>
         <button
           className="p-4 my-4 bg-red-600 w-full rounded-lg"
-          onClick={toggleCheckValidation}
+          onClick={handleButtonClick}
         >
           {isSignInForm ? "Sign In" : "Sign Up"}
         </button>
