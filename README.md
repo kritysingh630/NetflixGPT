@@ -13,6 +13,9 @@
 - Create SignUp User Account
 - implement Sign In user API
 - Created Redux Store with userSlice
+- Created on authentication state change
+- Add User and remove User
+- dispatach and navigate
 
 # Features
 
